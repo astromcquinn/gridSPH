@@ -1,8 +1,6 @@
 #ifndef GRIDGADGET_H
 #define GRIDGADGET_H
 
-#define float double   //converts everything to double precision
-
 
 #include <stdio.h>
 #include <stdlib.h>

@@ -4,7 +4,7 @@ import numpy as np
 from libc.stdlib cimport malloc, free
 
 
-cdef extern from "/Users/matt/Dropbox/grad_students_projects/Hurum/gridGadget.h":
+cdef extern from "./gridGadget.h":
     struct gridStruct:
         float Rho
         float T
