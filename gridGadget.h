@@ -16,6 +16,15 @@ struct particle_data
     float Rho, U, Temp, Ne, Nh, Hsml;
 };
 
+
+struct particle_data_DM 
+{
+    float Pos[3];
+    float Vel[3];
+    float Mass;
+};
+
+
 struct gridStruct
 {
     float Rho;
@@ -27,6 +36,7 @@ struct gridStruct
 // Function prototypes
 
 void gridSPH(struct gridStruct *grid, struct particle_data *part_struct, double BoxSize, int Na, int Ngas);
+void gridCIC_DM(struct gridStruct *grid, struct particle_data_DM *part_struct_DM, double BoxSize, int Nmesh, int NDM);
 void set_sph_kernel(void);
 double getSeparation(double x, double y, double BoxSize);
 

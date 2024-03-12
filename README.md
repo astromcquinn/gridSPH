@@ -2,7 +2,7 @@
 
 Code grids SPH particles and does simple analysis on them.
 
-#example for how to run code is read_gadget.ipynb
+Example for how to run code is read_gadget.ipynb
 
 
 

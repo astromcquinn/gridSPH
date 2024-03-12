@@ -103,6 +103,75 @@ void gridSPH(struct gridStruct *grid, struct particle_data *part_struct, double 
   //   exit(-5);
 }
 
+void gridCIC_DM(struct gridStruct *grid, struct particle_data_DM *part_struct_DM, double BoxSize, int Nmesh, int NDM)
+{
+  int i, j, k, ii, jj, kk;
+  float f1,f2,f3,f4,f5,f6,f7,f8, u,v,w, val;
+
+  for(int iDM=0; iDM<NDM; iDM++)
+    {
+        struct particle_data_DM *p = &part_struct_DM[iDM];
+      u = p->Pos[0] / BoxSize * Nmesh;
+      v = p->Pos[1] / BoxSize * Nmesh;
+      w = p->Pos[2] / BoxSize * Nmesh;
+            
+      i = (int) u;
+      j = (int) v;
+      k = (int) w;
+
+
+
+
+      //  fprintf(stderr, "%le %le %le %d %d %d\n", u, v, w, i, j, k);
+            
+      if(i >= Nmesh)
+        i = Nmesh - 1;
+      if(j >= Nmesh)
+        j = Nmesh - 1;
+      if(k >= Nmesh)
+        k = Nmesh - 1;
+            
+      u -= i;
+      v -= j;
+      w -= k;
+            
+      ii = i + 1;
+      jj = j + 1;
+      kk = k + 1;
+            
+      if(ii >= Nmesh)
+        ii -= Nmesh;
+      if(jj >= Nmesh)
+        jj -= Nmesh;
+      if(kk >= Nmesh)
+        kk -= Nmesh;
+            
+      f1 = (1 - u) * (1 - v) * (1 - w);
+      f2 = (1 - u) * (1 - v) * (w);
+      f3 = (1 - u) * (v) * (1 - w);
+      f4 = (1 - u) * (v) * (w);
+      f5 = (u) * (1 - v) * (1 - w);
+      f6 = (u) * (1 - v) * (w); 
+      f7 = (u) * (v) * (1 - w);
+      f8 = (u) * (v) * (w);
+              
+      val  = p->Mass; //assumes same number of DM particles
+      grid[(i * Nmesh + j) * Nmesh + k].Rho += val*f1;
+      grid[(i * Nmesh + j) * Nmesh + kk].Rho += val*f2;
+      grid[(i * Nmesh + jj) * Nmesh + k].Rho += val*f3;
+      grid[(i * Nmesh + jj) * Nmesh + kk].Rho += val*f4;
+      grid[(ii * Nmesh + j) * Nmesh + k].Rho += val*f5;
+      grid[(ii * Nmesh + j) * Nmesh + kk].Rho  += val*f6;
+      grid[(ii * Nmesh + jj) * Nmesh + k].Rho  += val*f7;
+      grid[(ii * Nmesh + jj) * Nmesh + kk].Rho += val*f8;
+
+
+      //  fprintf(stdout, "sum f = %le\n", f1+f2+f3+f4+f5+f6+f7+f8);
+    }
+}
+
+
+
 
 /******************************************************************************************
 Gadget SPH kernel

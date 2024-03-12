@@ -85,3 +85,20 @@ def average_fft_cross_power_spectrum(fftimages1, fftimages2, shape, is_3d=False)
     # Average across all images
     avg_radial_power_spectrum = sum_radial_power_spectrum / num_images1
     return avg_radial_power_spectrum
+
+
+
+#removes the CIC window function for DM (3d only) 
+def removeCICWindow(Rf, BoxSize, Na):
+    dk = 2. * np.pi / BoxSize
+    dx = BoxSize / Na
+    kz, ky, kx = np.meshgrid(np.fft.fftfreq(Na), np.fft.fftfreq(Na), np.fft.rfftfreq(Na))
+    kz, ky, kx = kz * Na * dk, ky * Na * dk, kx * Na * dk
+
+    denom = (0.5 * dx * kx) * (0.5 * dx * ky) * (0.5 * dx * kz)
+    W =  np.sin(0.5 * dx * kx) * np.sin(0.5 * dx * ky) * np.sin(0.5 * dx * kz)
+    cond = (np.abs(denom) > 1e-10)
+    W[cond] /= denom[cond]
+    W[~cond] = 1
+
+    return Rf/W**2
