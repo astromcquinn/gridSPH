@@ -141,6 +141,7 @@ density_kernel_wk(DensityKernel * kernel, double u)
 
 
 
+/*
 
 // Example modification of gridSPH to use the new kernel function
 void gridSPH(struct gridStruct *grid, struct particle_data *part_struct, double BoxSize, int Na, int Ngas) {
@@ -155,8 +156,7 @@ void gridSPH(struct gridStruct *grid, struct particle_data *part_struct, double 
     // Get the kernel weight using the new function
     DensityKernel kernel;
     kernel.type =  1; // I believe type 2 is the correct kernel if we are using the sophisticated SPH (the quintic kerrnel)
-    kernel.support = KERNELS[kernel.type].support;
-    double sigma = KERNELS[kernel.type].sigma[3 - 1];
+    kernel.Wknorm = 1.0 / (h * h * h); // Normalization might need adjustment
     
     printf("Name: %s\n", KERNELS[1].name);
     printf("Support: %f\n", KERNELS[1].support);
@@ -168,25 +168,10 @@ void gridSPH(struct gridStruct *grid, struct particle_data *part_struct, double 
         jp = (int)(Na * (p->Pos[1] + 0.5) / BoxSize);
         kp = (int)(Na * (p->Pos[2] + 0.5) / BoxSize);
 
-        Mass = p->Mass; 
+        Mass = p->Mass * 1e10; // Convert from gadget unit
         Temp = p->Temp;
         h = p->Hsml;
         num_sur = (int)(h / cell_size + 0.5);
-
-        //new 
-      double hinv = kernel.support/h;
-
-      kernel.Wknorm = sigma * pow(hinv, 3.);
-      kernel.dWknorm = kernel.Wknorm * hinv;
-      
-    
-      //to check kernel is doing right thing
-      //  if(i == 0){
-      //  double integrateKernel(double h, DensityKernel *kernel);
-      //  integrateKernel(h, &kernel);
-      //}
-
-      
 
         for (cell[0] = ip - num_sur; cell[0] <= ip + num_sur; cell[0]++)
             for (cell[1] = jp - num_sur; cell[1] <= jp + num_sur; cell[1]++)
@@ -203,13 +188,11 @@ void gridSPH(struct gridStruct *grid, struct particle_data *part_struct, double 
                         u = r / h;
 
 
-                        double wk = density_kernel_wk(&kernel, u);
-                        //double dwk0 = density_kernel_dwk(&kernel, u);
-                        
-                        /* //old method
+                        //wk = density_kernel_wk(&kernel, u);
+
                         int ii = (int) (u * KERNEL_TABLE);
                         wk = 1.0 / (h*h*h) * (Kernel3D[ii] +(Kernel3D[ii + 1] - Kernel3D[ii]) 
-                            * (u - KernelRad[ii])* KERNEL_TABLE);*/
+                            * (u - KernelRad[ii])* KERNEL_TABLE);
                         
 
                         grid[ll].Rho += Mass * wk;
@@ -226,34 +209,7 @@ void gridSPH(struct gridStruct *grid, struct particle_data *part_struct, double 
     }
 }
 
-/*
-//for testing code
-double integrateKernel(double h, DensityKernel *kernel)
-{
-  double sum1=0, sum2=0;
-  for(double u =0.0001; u<1; u*=1.01)
-  {
-    double wk = density_kernel_wk(kernel, u);
-   
-    sum1 += wk*4*M_PI*u*u*(u*.01)*h*h*h;
-
-    int ii = (int) (u * KERNEL_TABLE);
-    double wk2 = 1.0 / (h*h*h) * (Kernel3D[ii] +(Kernel3D[ii + 1] - Kernel3D[ii]) 
-                            * (u - KernelRad[ii])* KERNEL_TABLE);
-
-    printf("%f %f %f\n", u, wk, wk2);
-
-
-    sum2 += wk2*4*M_PI*u*u*(u*.01)*h*h*h;
-  }
-  printf("sum1 = %f sum2 = %f\n", sum1, sum2);
-
-}
 */
-
-
-/*
-
 
 //taken from Lya forest code
 //Na is nnumber of cells across
@@ -268,7 +224,6 @@ void gridSPH(struct gridStruct *grid, struct particle_data *part_struct, double 
   double cell_size = BoxSize/Na;
   set_sph_kernel();
 
-  printf("old version of sph kernel\n");
 
   for(int i=0; i<Ngas; i++)
   {
@@ -326,7 +281,6 @@ void gridSPH(struct gridStruct *grid, struct particle_data *part_struct, double 
    
   //   exit(-5);
 }
-*/
 
 void gridCIC_DM(struct gridStruct *grid, struct particle_data_DM *part_struct_DM, double BoxSize, int Nmesh, int NDM)
 {

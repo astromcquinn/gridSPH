@@ -33,12 +33,36 @@ struct gridStruct
     float vel[3]; 
 };
 
-// Function prototypes
+enum DensityKernelType {
+    DENSITY_KERNEL_CUBIC_SPLINE = 1,
+    DENSITY_KERNEL_QUINTIC_SPLINE = 2,
+    DENSITY_KERNEL_QUARTIC_SPLINE = 4,
+};
+
+typedef struct {
+    double H;
+    double HH;
+    double Hinv; /* convert from r to u*/
+    int type;
+    double support;
+    const char * name;
+    /* private: */
+    double Wknorm;
+    double dWknorm;
+} DensityKernel;
+
+
 
 void gridSPH(struct gridStruct *grid, struct particle_data *part_struct, double BoxSize, int Na, int Ngas);
 void gridCIC_DM(struct gridStruct *grid, struct particle_data_DM *part_struct_DM, double BoxSize, int Nmesh, int NDM);
 void set_sph_kernel(void);
 double getSeparation(double x, double y, double BoxSize);
+
+double density_kernel_dwk(DensityKernel * kernel, double u);
+double density_kernel_wk(DensityKernel * kernel, double u);
+
+
+
 
 #endif // GRIDGADGET_H
  
